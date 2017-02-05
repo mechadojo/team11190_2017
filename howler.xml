@@ -21,6 +21,12 @@
         <AdafruitBNO055IMU name = "imu" port="3" />
         <AnalogInput name="MidProximity" port="0" />
         <AnalogInput name="FarProximity" port="1" />
+        <AnalogInput name="line1" port="2" />
+        <AnalogInput name="line2" port="3" />
+        <AnalogInput name="line3" port="4" />
+        <AnalogInput name="frontLine" port="5" />
+        <AnalogInput name="leftSonar" port="6" />
+        <AnalogInput name="rightSonar" port="7" />
     </DeviceInterfaceModule>
     <MotorController name="drive3" serialNumber="AL00XV52">
         <Motor name="leftFront" port="1" />
