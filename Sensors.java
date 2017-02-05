@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.content.pm.PackageInfo;
 import android.graphics.Color;
 
-import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,8 +10,6 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.Locale;
@@ -28,7 +23,14 @@ public class Sensors {
 
     public BNO055IMU imu;
 
-    public DojoLineArray lineSensor;
+    public DojoLineArray lineSensorArray;
+
+    public AnalogInput lineSensor1;
+    public AnalogInput lineSensor2;
+    public AnalogInput lineSensor3;
+
+    public AnalogInput leftSonar;
+    //public AnalogInput rightSonar;
 
     float hsvLeft[] = {0, 0, 0};
     float hsvRight[] = {0, 0, 0};
@@ -43,6 +45,21 @@ public class Sensors {
     double midProximity = 0;
     double farProximity = 0;
 
+    double line1 = 0;
+    double line2 = 0;
+    double line3 = 0;
+
+    boolean onLine1 = false;
+    boolean onLine2 = false;
+    boolean onLine3 = false;
+
+    double lineThreshold = 1.5;
+
+    double leftSonarDist = 0;
+    double rightSonarDist = 0;
+
+    boolean vortexSeen = false;
+
     public Orientation orient;
     int lineArray;
     double linePosition;
@@ -54,7 +71,10 @@ public class Sensors {
         hwmap = ahwmap;
 
 
-        lineSensor = new DojoLineArray(hwmap.i2cDeviceSynch.get("LineFront"), 0x40);
+        lineSensorArray = new DojoLineArray(hwmap.i2cDeviceSynch.get("LineFront"), 0x40);
+        lineSensor1 = hwmap.analogInput.get("line1");
+        lineSensor2 = hwmap.analogInput.get("line2");
+        lineSensor3 = hwmap.analogInput.get("line3");
 
         colorLeft = hwmap.colorSensor.get("colorLeft");
         colorLeft.setI2cAddress(I2cAddr.create8bit(0x3c));
@@ -68,17 +88,20 @@ public class Sensors {
         midProx = hwmap.analogInput.get("MidProximity");
         farProx = hwmap.analogInput.get("FarProximity");
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        leftSonar = hwmap.analogInput.get("leftSonar");
+        //rightSonar = hwmap.analogInput.get("rightSonar");
+
+        /*BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.mode = BNO055IMU.SensorMode.NDOF;
+        parameters.mode = BNO055IMU.SensorMode.NDOF;*/
 
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        imu = hwmap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+        //imu = hwmap.get(BNO055IMU.class, "imu");
+        //imu.initialize(parameters);
     }
 
     public void updateSensors() {
@@ -94,9 +117,22 @@ public class Sensors {
         midProximity = midProx.getVoltage();
         farProximity = farProx.getVoltage();
 
-        orient = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZXY);
-        lineArray = lineSensor.ReadArray();
-        linePosition = lineSensor.ReadPosition(lineArray);
+        line1 = lineSensor1.getVoltage();
+        line2 = lineSensor2.getVoltage();
+        line3 = lineSensor3.getVoltage();
+
+        onLine1 = line1 > lineThreshold;
+        onLine2 = line2 > lineThreshold;
+        onLine3 = line3 > lineThreshold;
+
+        leftSonarDist = leftSonar.getVoltage();
+        //rightSonarDist = rightSonar.getVoltage();
+
+        vortexSeen = leftSonarDist > 0.08 || rightSonarDist > 0.08;
+
+        //orient = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZXY);
+        lineArray = lineSensorArray.ReadArray();
+        linePosition = lineSensorArray.ReadPosition(lineArray);
     }
 
 
@@ -112,15 +148,28 @@ public class Sensors {
 
         t.addData("Colors", (isLeftColorValid ? leftColor : "None") + " " + (isRightColorValid ? rightColor : "None"));
         t.addData("Proximity", String.format("Mid: %.2f Far: %.2f", midProximity, farProximity));
+        t.addData("Sonar", String.format("Left: %.2f, Right: %.2f", leftSonarDist, rightSonarDist));
+        t.addData("Line", String.format("1: %.2f, 2: %.2f, 3: %.2f", line1, line2, line3));
+        t.addData("On Line", "1: " + onLine1 + ", 2:" + onLine2 + ", 3:" + onLine3);
+        t.addData("Vortex Seen", vortexSeen);
 
         String front = Integer.toBinaryString(lineArray);
         front = "00000000".substring(front.length()) + front;
-        t.addData("Line", String.format("%s %.1f", front, linePosition));
+        t.addData("Line Array", String.format("%s %.1f", front, linePosition));
 
-        t.addData("heading", formatAngle(orient.angleUnit, orient.firstAngle));
+        /*t.addData("heading", formatAngle(orient.angleUnit, orient.firstAngle));
         t.addData("pitch", formatAngle(orient.angleUnit, orient.secondAngle));
-        t.addData("roll", formatAngle(orient.angleUnit, orient.thirdAngle));
+        t.addData("roll", formatAngle(orient.angleUnit, orient.thirdAngle));*/
 
 
+    }
+
+    boolean onLine(double threshold) {
+        if(line1 < threshold || line2 < threshold || line3 < threshold) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

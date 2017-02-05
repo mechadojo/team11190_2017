@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Hardware {
     public DcMotor leftFront;
     public DcMotor leftMid;
@@ -192,5 +194,14 @@ public class Hardware {
 
     public void moveServo(Servo servo, double pos) {
         servo.setPosition(pos);
+    }
+
+    public void updateRobotTelemetry(Telemetry t) {
+        readEncoders();
+        t.addData("Shooter Pos", shooterPos);
+        t.addData("Drive Pos", "L: " + leftPos + " R: " + rightPos);
+        t.addData("Drive Power", "L: " + leftPower + " R: " + rightPower);
+        t.addData("Flicker Pos", "L: " + (leftFlicker.getPosition() == LEFT_FLICKER_DOWN ? "Down" : "Up") +
+            " R: " + (rightFlicker.getPosition() == RIGHT_FLICKER_DOWN ? "Down" : "Up"));
     }
 }
