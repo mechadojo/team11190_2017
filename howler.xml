@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC" name="Howler Default">
+    <ServoController name="Servo Controller 1" serialNumber="AL00VTKC">
+        <Servo name="leftFlicker" port="1" />
+        <Servo name="rightFlicker" port="2" />
+    </ServoController>
+    <MotorController name="drive1" serialNumber="AL00XPW6">
+        <Motor name="leftBack" port="1" />
+        <Motor name="rightBack" port="2" />
+    </MotorController>
+    <ServoController name="Servo Controller 2" serialNumber="AL00XODC">
+    </ServoController>
+    <MotorController name="drive2" serialNumber="AI049PNE">
+        <Motor name="leftMid" port="1" />
+        <Motor name="rightMid" port="2" />
+    </MotorController>
+    <DeviceInterfaceModule name="Device Interface Module 3" serialNumber="AL00VGIK">
+        <I2cDeviceSynch name="LineFront" port="0" />
+        <ColorSensor name="colorLeft" port="1" />
+        <ColorSensor name="colorRight" port="2" />
+        <AdafruitBNO055IMU name = "imu" port="3" />
+        <AnalogInput name="MidProximity" port="0" />
+        <AnalogInput name="FarProximity" port="1" />
+    </DeviceInterfaceModule>
+    <MotorController name="drive3" serialNumber="AL00XV52">
+        <Motor name="leftFront" port="1" />
+        <Motor name="rightFront" port="2" />
+    </MotorController>
+    <MotorController name="Collect and Shoot" serialNumber="AI049PEO">
+        <Motor name="collector" port="1" />
+        <Motor name="shooter" port="2" />
+    </MotorController>
+</Robot>
