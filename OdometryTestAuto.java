@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.os.Environment;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -9,6 +10,7 @@ import org.mechadojo.navigation.EncoderMessage;
 import org.mechadojo.navigation.TwoWheelOdometry;
 import org.mechadojo.stateflow.Controller;
 import org.mechadojo.stateflow.Message;
+import org.mechadojo.stateflow.MessageFileLog;
 import org.mechadojo.stateflow.examples.DelayedHelloWorldController;
 import org.mechadojo.stateflow.opmode.StateFlowOpMode;
 
@@ -25,7 +27,8 @@ public class OdometryTestAuto extends StateFlowOpMode {
 
     @Override
     public Controller loadController() {
-        return new Controller();
+        Controller result = new Controller();
+        return result;
     }
 
     @Override
@@ -52,6 +55,11 @@ public class OdometryTestAuto extends StateFlowOpMode {
     @Override
     public void start() {
         super.start();
+
+        String sdcard = Environment.getExternalStorageDirectory().getPath();
+        MessageFileLog log = new MessageFileLog("^odometry/(left|right)_wheel$", "/sdcard/MechaDojo/wheel_speeds.csv", true );
+        controller.addMessageLog("encoders", log);
+
     }
 
     @Override
