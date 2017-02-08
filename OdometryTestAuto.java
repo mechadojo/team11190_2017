@@ -57,7 +57,7 @@ public class OdometryTestAuto extends StateFlowOpMode {
         super.start();
 
         String sdcard = Environment.getExternalStorageDirectory().getPath();
-        MessageFileLog log = new MessageFileLog("^odometry/(left|right)_wheel$", "/sdcard/MechaDojo/wheel_speeds.csv", true );
+        MessageFileLog log = new MessageFileLog("^odometry/left_wheel$", "/sdcard/MechaDojo/left_wheel.csv", true );
         controller.addMessageLog("encoders", log);
 
     }
