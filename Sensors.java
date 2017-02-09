@@ -175,7 +175,7 @@ public class Sensors implements ParameterRefresh {
     }
 
     boolean onLine(double threshold) {
-        if(line1 < threshold || line2 < threshold || line3 < threshold) {
+        if(line1 > threshold || line2 > threshold || line3 > threshold) {
             return true;
         }
         else {
