@@ -70,6 +70,12 @@ public class LineupAuto extends StateFlowOpMode {
                         }
                         action.out("WAIT", msg);
                     }
+                })
+                .addComponent("auto/turn_to_wall", "OUT,WAIT", "OUT,WAIT", new MessageHandler() {
+                    @Override
+                    public void handle(MessageRoute msg, Action action) {
+                        
+                    }
                 });
 
         result.addBehavior("main")
