@@ -60,6 +60,8 @@ public class OdometryTestAuto extends StateFlowOpMode {
         MessageFileLog log = new MessageFileLog("^odometry/left_wheel$", "/sdcard/MechaDojo/left_wheel.csv", true );
         controller.addMessageLog("encoders", log);
 
+
+
     }
 
     @Override
@@ -119,6 +121,12 @@ public class OdometryTestAuto extends StateFlowOpMode {
 
     boolean startPressed = false;
     boolean teleMode = true;
+
+    boolean leftPressed = false;
+    boolean leftButtonMode = false;
+
+    boolean rightPressed = false;
+    boolean rightButtonMode = false;
 
     public void handleTeleop() {
 
@@ -218,11 +226,39 @@ public class OdometryTestAuto extends StateFlowOpMode {
             drivePower *= -0.5;
         }
 
+        double leftButton;
+        if(gamepad1.dpad_left && !leftPressed) {
+            leftButtonMode = !leftButtonMode;
+        }
+        leftPressed = gamepad1.dpad_left;
+
+        double rightButton;
+        if(gamepad1.dpad_right && !rightPressed) {
+            rightButtonMode = !rightButtonMode;
+        }
+        rightPressed = gamepad1.dpad_right;
+
+        if(leftButtonMode) {
+            leftButton = howler.LEFT_BUTTON_UP;
+        }
+        else {
+            leftButton = howler.LEFT_BUTTON_DOWN;
+        }
+
+        if(rightButtonMode) {
+            rightButton = howler.RIGHT_BUTTON_UP;
+        }
+        else {
+            rightButton = howler.RIGHT_BUTTON_DOWN;
+        }
+
         double leftPower = drivePower + turnPower;
         double rightPower = drivePower - turnPower;
 
         howler.moveServo(howler.leftFlicker, leftFlick);
         howler.moveServo(howler.rightFlicker, rightFlick);
+        howler.moveServo(howler.leftButton, leftButton);
+        howler.moveServo(howler.rightButton, rightButton);
         howler.drive(leftPower, rightPower);
         howler.collect(collectPower);
         howler.shoot(shootPower);

@@ -11,10 +11,12 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.mechadojo.stateflow.Controller;
+import org.mechadojo.stateflow.ParameterRefresh;
 
 import java.util.Locale;
 
-public class Sensors {
+public class Sensors implements ParameterRefresh {
     public ColorSensor colorLeft;
     public ColorSensor colorRight;
 
@@ -102,6 +104,14 @@ public class Sensors {
         // and named "imu".
         //imu = hwmap.get(BNO055IMU.class, "imu");
         //imu.initialize(parameters);
+    }
+
+    public void update(Controller controller) {
+        line1 = lineSensor1.getVoltage();
+        line2 = lineSensor2.getVoltage();
+        line3 = lineSensor3.getVoltage();
+
+        controller.setParameter("sensor/line", "sensors", new LineSensorMessage(line1, line2, line3));
     }
 
     public void updateSensors() {

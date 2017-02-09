@@ -23,6 +23,8 @@ public class Hardware {
 
     public Servo leftFlicker;
     public Servo rightFlicker;
+    public Servo leftButton;
+    public Servo rightButton;
 
     public ColorSensor colorLeft;
     public ColorSensor colorRight;
@@ -44,6 +46,10 @@ public class Hardware {
     static double RIGHT_FLICKER_DOWN = 0.0;
     static double RIGHT_FLICKER_UP = 1.0;
 
+    static double LEFT_BUTTON_DOWN = 0.0;
+    static double LEFT_BUTTON_UP = 1.0;
+    static double RIGHT_BUTTON_DOWN = 1.0;
+    static double RIGHT_BUTTON_UP = 0.0;
 
     Hardware() {}
 
@@ -63,6 +69,14 @@ public class Hardware {
 
         leftFlicker = hwmap.servo.get("leftFlicker");
         rightFlicker = hwmap.servo.get("rightFlicker");
+
+        leftButton = hwmap.servo.get("leftButton");
+        rightButton = hwmap.servo.get("rightButton");
+
+        moveServo(leftFlicker, LEFT_FLICKER_DOWN);
+        moveServo(rightFlicker, RIGHT_FLICKER_DOWN);
+        moveServo(leftButton, LEFT_BUTTON_DOWN);
+        moveServo(rightButton, RIGHT_BUTTON_DOWN);
 
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -203,5 +217,7 @@ public class Hardware {
         t.addData("Drive Power", "L: " + leftPower + " R: " + rightPower);
         t.addData("Flicker Pos", "L: " + (leftFlicker.getPosition() == LEFT_FLICKER_DOWN ? "Down" : "Up") +
             " R: " + (rightFlicker.getPosition() == RIGHT_FLICKER_DOWN ? "Down" : "Up"));
+        t.addData("Button Pos", "L: " + (leftButton.getPosition() == LEFT_BUTTON_DOWN ? "Down" : "Up") +
+                ", R: " + (rightButton.getPosition() == RIGHT_BUTTON_DOWN ? "Down" : "Up"));
     }
 }
