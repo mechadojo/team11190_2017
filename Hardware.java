@@ -8,8 +8,12 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.mechadojo.navigation.EncoderMessage;
+import org.mechadojo.stateflow.Controller;
+import org.mechadojo.stateflow.ParameterRefresh;
+import org.mechadojo.stateflow.messages.BooleanMessage;
 
-public class Hardware {
+public class Hardware implements ParameterRefresh {
     public DcMotor leftFront;
     public DcMotor leftMid;
     public DcMotor leftBack;
@@ -40,6 +44,13 @@ public class Hardware {
     double rightPos;
 
     double shooterPos;
+
+    public boolean firstUpdate = true;
+
+    public boolean leftMoving = false;
+    public boolean leftStalled = false;
+    public boolean rightMoving = false;
+    public boolean rightStalled = false;
 
     static double LEFT_FLICKER_DOWN = 1.0;
     static double LEFT_FLICKER_UP = 0.0;
@@ -86,6 +97,48 @@ public class Hardware {
         resetEncoders(false);
         resetShooter(false);
         setCoastMode(false);
+
+        firstUpdate = true;
+    }
+
+    public void update(Controller controller) {
+        boolean lm = leftMoving;
+        boolean ls = leftStalled;
+        boolean rm = rightMoving;
+        boolean rs = rightStalled;
+
+        if (leftPower != 0) {
+            EncoderMessage left = (EncoderMessage) controller.getParameter("odometry/left_wheel");
+
+            if (leftMoving) {
+                if (left.speed == 0) leftStalled = true;
+            } else {
+                if (left.speed != 0) leftMoving = true;
+            }
+        } else {
+            leftMoving = false;
+            leftStalled = false;
+        }
+
+        if (rightPower != 0) {
+            EncoderMessage right = (EncoderMessage) controller.getParameter("odometry/right_wheel");
+
+            if (rightMoving) {
+                if (right.speed == 0) rightStalled = true;
+            } else {
+                if (right.speed != 0) rightMoving = true;
+            }
+        } else {
+            rightMoving = false;
+            rightStalled = false;
+        }
+
+        if (lm != leftMoving || firstUpdate) controller.setParameter("robot/left_moving", "robot", new BooleanMessage(leftMoving));
+        if (ls != leftStalled || firstUpdate) controller.setParameter("robot/left_stalled", "robot", new BooleanMessage(leftStalled));
+        if (rm != rightMoving || firstUpdate) controller.setParameter("robot/right_moving", "robot", new BooleanMessage(rightMoving));
+        if (rs != rightStalled || firstUpdate) controller.setParameter("robot/right_stalled", "robot", new BooleanMessage(rightStalled));
+
+        firstUpdate = false;
     }
 
     public void stopDrive() {
@@ -96,6 +149,9 @@ public class Hardware {
         rightFront.setPower(0);
         rightMid.setPower(0);
         rightBack.setPower(0);
+
+        leftPower = 0;
+        rightPower = 0;
     }
 
     public void stopRobot() {
@@ -194,6 +250,11 @@ public class Hardware {
         rightFront.setPower(rightPower);
         rightMid.setPower(rightPower);
         rightBack.setPower(rightPower);
+    }
+
+    public void buttons(boolean left, boolean right) {
+        leftButton.setPosition(left ? LEFT_BUTTON_DOWN : LEFT_BUTTON_UP);
+        rightButton.setPosition(right ? RIGHT_BUTTON_DOWN : RIGHT_BUTTON_UP);
     }
 
     public void collect(double cp) {

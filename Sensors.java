@@ -50,6 +50,7 @@ public class Sensors implements ParameterRefresh {
     double line1 = 0;
     double line2 = 0;
     double line3 = 0;
+    double line4 = 0;
 
     boolean onLine1 = false;
     boolean onLine2 = false;
@@ -110,8 +111,16 @@ public class Sensors implements ParameterRefresh {
         line1 = lineSensor1.getVoltage();
         line2 = lineSensor2.getVoltage();
         line3 = lineSensor3.getVoltage();
+        line4 = leftSonar.getVoltage();
+        controller.setParameter("sensor/line", "sensors", new LineSensorMessage(line1, line2, line3, line4));
 
-        controller.setParameter("sensor/line", "sensors", new LineSensorMessage(line1, line2, line3));
+        midProximity = midProx.getVoltage();
+        controller.setParameter("sensor/proximity", "sensors", new ProximitySensorMessage(midProximity));
+
+        Color.RGBToHSV(colorLeft.red() * 8, colorLeft.green() * 8, colorLeft.blue() * 8, hsvLeft);
+        Color.RGBToHSV(colorRight.red() * 8, colorRight.green() * 8, colorRight.blue() * 8, hsvRight);
+
+        controller.setParameter("sensor/color", "sensors", new ColorSensorMessage(hsvLeft, hsvRight));
     }
 
     public void updateSensors() {
@@ -145,6 +154,10 @@ public class Sensors implements ParameterRefresh {
         linePosition = lineSensorArray.ReadPosition(lineArray);
     }
 
+    public void updateLineArray() {
+        lineArray = lineSensorArray.ReadArray();
+        linePosition = lineSensorArray.ReadPosition(lineArray);
+    }
 
     String formatAngle(AngleUnit angleUnit, double angle) {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));

@@ -30,14 +30,29 @@ public class TestDriveEncoderAuto extends StateFlowOpMode {
     public Controller loadController() {
         Controller result = new Controller();
         result.addLibrary("drive")
-                .addComponents(new DriveByEncoderComponent("auto/drive_fwd", howler, "odometry/right_wheel", 1.0, 1.0)
-                                    .power(.45, .25)
-                                    .target(0, 1.0))
+                .addComponents(new DriveByEncoderComponent("auto/drive_fwd", howler, "odometry/right_wheel", -1.0, -1.0)
+                                    .pid(0, .2, 0, 0)
+                                    .delay(0, 1000)
+                                    .power(.35, 0)
+                                    .target(1.5, 0, -999.0))
 
-                .addComponent("auto/go", new MessageHandler() {
+                .addComponents(new DriveByEncoderComponent("auto/drive_rev", howler, "odometry/right_wheel", -1.0, -1.0)
+                        .pid(0, .2, 0, 0)
+                        .power(.35, 0)
+                        .target(1.5, 999.0, 0.0))
+
+                .addComponent("auto/fwd_two", new MessageHandler() {
                     @Override
                     public void handle(MessageRoute msg, Action action) {
-                        msg.message = new DriveByEncoderMessage(1.0);
+                        msg.message = new DriveByEncoderMessage(2.0);
+                        action.next(msg);
+                    }
+                })
+
+                .addComponent("auto/back_two", new MessageHandler() {
+                    @Override
+                    public void handle(MessageRoute msg, Action action) {
+                        msg.message = new DriveByEncoderMessage(-2.0);
                         action.next(msg);
                     }
                 })
@@ -50,9 +65,10 @@ public class TestDriveEncoderAuto extends StateFlowOpMode {
                 });
 
         result.addBehavior("main")
-                .addConnection("step_1(auto/go) OUT -> IN move_1(auto/drive_fwd)")
-                .addConnection("move_1() WAIT -> WAIT move_1()")
-                .addConnection("move_1() OUT -> IN stop(auto/stop)")
+                .addConnection("step_1(auto/fwd_two) OUT -> IN move_1(auto/drive_fwd)")
+                .addConnection("move_1() OUT -> IN step_2(auto/back_two)")
+                .addConnection("step_2() OUT -> IN move_2(auto/drive_rev)")
+                .addConnection("move_2() OUT -> IN stop(auto/stop)")
 
                 .addEventTrigger("opmode/start", "IN step_1()" );
         result.initialize();

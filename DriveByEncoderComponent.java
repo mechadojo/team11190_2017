@@ -17,6 +17,8 @@ public class DriveByEncoderComponent extends Component {
     public double targetMax = 0.0;
     public double targetMin = 0.0;
 
+    public double maxError = 0.0;
+    public double zeroPower = 0.0;
     public double kP = 0.0;
     public double kI = 0.0;
     public double kD = 0.0;
@@ -27,7 +29,7 @@ public class DriveByEncoderComponent extends Component {
     public double leftPowerFactor = 0;
     public double rightPowerFactor = 0;
 
-    public boolean stopOnTarget;
+    public boolean stopOnTarget = true;
 
     // Add the current encoder position to the target when initializing the controller
     public boolean offsetTarget = true;
@@ -56,7 +58,7 @@ public class DriveByEncoderComponent extends Component {
         return this;
     }
 
-    public DriveByEncoderComponent pid(double kP, double kI, double kD) {
+    public DriveByEncoderComponent pid(double zeroPower, double kP, double kI, double kD) {
 
         this.kP = kP;
         this.kI = kI;
@@ -69,6 +71,13 @@ public class DriveByEncoderComponent extends Component {
         return this;
     }
 
+    public DriveByEncoderComponent delay(long delayOnStart, long delayOnTarget) {
+        this.delayOnStart = delayOnStart;
+        this.delayOnTarget = delayOnTarget;
+        return this;
+    }
+
+
     public DriveByEncoderComponent delay(long delayOnStart, long delayLoop, long delayOnTarget) {
         this.delayOnStart = delayOnStart;
         this.delayOnTarget = delayOnTarget;
@@ -76,7 +85,8 @@ public class DriveByEncoderComponent extends Component {
         return this;
     }
 
-    public DriveByEncoderComponent target(double targetMax, double targetMin) {
+    public DriveByEncoderComponent target(double maxError, double targetMax, double targetMin) {
+        this.maxError = maxError;
         this.targetMax = targetMax;
         this.targetMin = targetMin;
         return this;
@@ -117,6 +127,8 @@ public class DriveByEncoderComponent extends Component {
 
             EncoderMessage e = getEncoder(action);
 
+            m.pid.maxError = maxError;
+            m.pid.zeroPower = zeroPower;
             m.pid.kP = kP;
             m.pid.kI = kI;
             m.pid.kD = kD;
@@ -126,10 +138,14 @@ public class DriveByEncoderComponent extends Component {
             m.pid.value = e.position;
             m.pid.set(m.target + e.position);
 
-            if (delayOnStart > 0)
-                action.out("WAIT", msg.delay(delayOnStart));
+            msg.target.port = "WAIT";
+
+            if (delayOnStart > 0) {
+
+                action.idle(msg.delay(delayOnStart));
+            }
             else
-                action.out("WAIT", msg);
+                action.idle(msg);
         }
     }
 
@@ -165,12 +181,13 @@ public class DriveByEncoderComponent extends Component {
 
             action.verbose(String.format("Driving: %.2f (%.2f) Power: %.2f", e.position, m.pid.target, power));
 
+
             robot.drive(power * leftPowerFactor, power * rightPowerFactor);
 
             if (delayLoop > 0)
-                action.out("WAIT", msg.delay(delayLoop));
+                action.idle(msg.delay(delayLoop));
             else
-                action.out("WAIT", msg);
+                action.idle(msg);
         }
     }
 
