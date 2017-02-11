@@ -51,6 +51,8 @@ public class Hardware implements ParameterRefresh {
     public boolean leftStalled = false;
     public boolean rightMoving = false;
     public boolean rightStalled = false;
+    public long leftStallStart = 0;
+    public long rightStallStart = 0;
 
     static double LEFT_FLICKER_DOWN = 1.0;
     static double LEFT_FLICKER_UP = 0.0;
@@ -111,26 +113,49 @@ public class Hardware implements ParameterRefresh {
             EncoderMessage left = (EncoderMessage) controller.getParameter("odometry/left_wheel");
 
             if (leftMoving) {
-                if (left.speed == 0) leftStalled = true;
+                if (left.speed == 0)
+                {
+                    long dt = controller.getTime() - leftStallStart;
+                    if ( ((double)dt / 1000000.0) > 500.0)
+                        leftStalled = true;
+                } else {
+                    leftStallStart = controller.getTime();
+                }
             } else {
-                if (left.speed != 0) leftMoving = true;
+                if (left.speed != 0) {
+                    leftMoving = true;
+                }
+                leftStallStart = controller.getTime();
             }
         } else {
             leftMoving = false;
             leftStalled = false;
+            leftStallStart = controller.getTime();
+
         }
 
         if (rightPower != 0) {
             EncoderMessage right = (EncoderMessage) controller.getParameter("odometry/right_wheel");
 
             if (rightMoving) {
-                if (right.speed == 0) rightStalled = true;
+                if (right.speed == 0) {
+                    long dt = controller.getTime() - rightStallStart;
+                    if ( ((double)dt / 1000000.0) > 500.0)
+                        rightStalled = true;
+                }
+                else {
+                    rightStallStart = controller.getTime();
+                }
             } else {
-                if (right.speed != 0) rightMoving = true;
+                if (right.speed != 0) {
+                    rightMoving = true;
+                    rightStallStart = controller.getTime();
+                }
             }
         } else {
             rightMoving = false;
             rightStalled = false;
+            rightStallStart = controller.getTime();
         }
 
         if (lm != leftMoving || firstUpdate) controller.setParameter("robot/left_moving", "robot", new BooleanMessage(leftMoving));
