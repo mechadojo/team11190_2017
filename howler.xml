@@ -3,6 +3,8 @@
     <ServoController name="Servo Controller 1" serialNumber="AL00VTKC">
         <Servo name="leftFlicker" port="1" />
         <Servo name="rightFlicker" port="2" />
+        <Servo name="leftButton" port="3" />
+        <Servo name="rightButton" port="4" />
     </ServoController>
     <MotorController name="drive1" serialNumber="AL00XPW6">
         <Motor name="leftBack" port="1" />
@@ -25,7 +27,7 @@
         <AnalogInput name="line2" port="3" />
         <AnalogInput name="line3" port="4" />
         <AnalogInput name="frontLine" port="5" />
-        <AnalogInput name="leftSonar" port="6" />
+        <AnalogInput name="LineFront" port="6" />
         <AnalogInput name="rightSonar" port="7" />
     </DeviceInterfaceModule>
     <MotorController name="drive3" serialNumber="AL00XV52">

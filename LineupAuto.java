@@ -15,10 +15,6 @@ import org.mechadojo.stateflow.MessageRoute;
 import org.mechadojo.stateflow.StateFlowObject;
 import org.mechadojo.stateflow.opmode.StateFlowOpMode;
 
-/**
- * Created by Chad on 2/7/2017.
- */
-
 @Autonomous (name = "Line Up Auto", group = "StateFlow Test")
 public class LineupAuto extends StateFlowOpMode {
     Hardware howler = new Hardware();
@@ -117,7 +113,7 @@ public class LineupAuto extends StateFlowOpMode {
                         LineSensorMessage line = (LineSensorMessage)action.getParameter("sensor/line");
                         if (wheel != null && !odometry.reset) {
                             int count = 0;
-                            if(line.line1 <  1.0) count++;
+                            if(line.line1 < 1.0) count++;
                             if(line.line2 < 1.0) count++;
                             if(line.line3 < 1.0) count++;
 

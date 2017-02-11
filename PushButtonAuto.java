@@ -52,7 +52,10 @@ public class PushButtonAuto extends StateFlowOpMode {
                         .pid(-.15, .2, 0, 0)
                         .power(.35, .15)
                         .target(1.5, 999.0, 0.0))
-
+                .addComponents(new DriveByEncoderComponent("auto/back_turn_left", howler, "odometry/left_wheel", -1.0, 0)
+                        .pid(-0.15, 0.2, 0, 0)
+                        .power(.35, .15)
+                        .target(1.5, 999.9, 0.0))
                 .addComponent("auto/fwd_to_shoot", new MessageHandler() {
                     @Override
                     public void handle(MessageRoute msg, Action action) {
@@ -151,7 +154,7 @@ public class PushButtonAuto extends StateFlowOpMode {
                     }
                 })
 
-                .addComponent("auto/turn_ccw_to_beacon", new MessageHandler() {
+                .addComponent("auto/turn_to_beacon", new MessageHandler() {
                     @Override
                     public void handle(MessageRoute msg, Action action) {
 
@@ -163,7 +166,8 @@ public class PushButtonAuto extends StateFlowOpMode {
                             action.next(msg.delay(1000));
                         } else {
                             action.info(String.format("Searching for line: %f", lm.line4));
-                            howler.drive(.15, -.15);
+                            if(TeamColor.equals("Red")) howler.drive(.20, -.20);
+                            else howler.drive(-.20, .20);
                             action.idle(msg);
                         }
                     }
@@ -305,7 +309,9 @@ public class PushButtonAuto extends StateFlowOpMode {
 
                 .addConnection("beacon_1() OUT -> IN beacon_2(auto/drive_fwd_short)")
                 .addConnection("beacon_2() OUT -> IN beacon_3(auto/turn_back_to_beacon)")
-                .addConnection("beacon_3() OUT -> IN beacon_4(auto/back_turn_right)")
+                .addConnection(TeamColor.equals("Red")
+                        ? "beacon_3() OUT -> IN beacon_4(auto/back_turn_right)"
+                        : "beacon_3() OUT -> IN beacon_4(auto/back_turn_left)")
 
                 .addConnection("beacon_4() OUT -> IN beacon_5(auto/rev_to_beacon) -> IN wait_center_line(auto/wait_for_center_line)")
                 .addConnection("beacon_5() OUT -> IN beacon_6(auto/drive_rev)")
@@ -318,7 +324,7 @@ public class PushButtonAuto extends StateFlowOpMode {
 
 
         result.addBehavior("first_beacon")
-                .addConnection("button_1(auto/turn_ccw_to_beacon) OUT -> IN button_2(auto/select_button)")
+                .addConnection("button_1(auto/turn_to_beacon) OUT -> IN button_2(auto/select_button)")
                 .addConnection("button_2() OUT -> IN button_3(auto/press_button)")
                 .addConnection("button_3() OUT -> IN button_4(auto/back_from_beacon)")
                 .addConnection("button_4() OUT -> IN button_5(auto/drive_fwd_short)")

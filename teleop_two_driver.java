@@ -16,7 +16,7 @@ public class teleop_two_driver extends LinearOpMode {
 
         waitForStart();
 
-        sensors.lineSensorArray.EnableArray();
+        //sensors.lineSensorArray.EnableArray();
 
         boolean yButtonPressed = false;
         boolean buttonMode = false;

@@ -31,6 +31,8 @@ public class Sensors implements ParameterRefresh {
     public AnalogInput lineSensor2;
     public AnalogInput lineSensor3;
 
+    public AnalogInput lineSensorFront;
+
     public AnalogInput leftSonar;
     //public AnalogInput rightSonar;
 
@@ -52,9 +54,13 @@ public class Sensors implements ParameterRefresh {
     double line3 = 0;
     double line4 = 0;
 
+    double lineFront = 0;
+
     boolean onLine1 = false;
     boolean onLine2 = false;
     boolean onLine3 = false;
+
+    boolean onLineFront = false;
 
     double lineThreshold = 1.5;
 
@@ -79,6 +85,8 @@ public class Sensors implements ParameterRefresh {
         lineSensor2 = hwmap.analogInput.get("line2");
         lineSensor3 = hwmap.analogInput.get("line3");
 
+        lineSensorFront = hwmap.analogInput.get("LineFront");
+
         colorLeft = hwmap.colorSensor.get("colorLeft");
         colorLeft.setI2cAddress(I2cAddr.create8bit(0x3c));
         colorRight = hwmap.colorSensor.get("colorRight");
@@ -91,7 +99,7 @@ public class Sensors implements ParameterRefresh {
         midProx = hwmap.analogInput.get("MidProximity");
         farProx = hwmap.analogInput.get("FarProximity");
 
-        leftSonar = hwmap.analogInput.get("leftSonar");
+        //leftSonar = hwmap.analogInput.get("leftSonar");
         //rightSonar = hwmap.analogInput.get("rightSonar");
 
         /*BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -111,7 +119,7 @@ public class Sensors implements ParameterRefresh {
         line1 = lineSensor1.getVoltage();
         line2 = lineSensor2.getVoltage();
         line3 = lineSensor3.getVoltage();
-        line4 = leftSonar.getVoltage();
+        line4 = lineSensorFront.getVoltage();
         controller.setParameter("sensor/line", "sensors", new LineSensorMessage(line1, line2, line3, line4));
 
         midProximity = midProx.getVoltage();
@@ -140,11 +148,15 @@ public class Sensors implements ParameterRefresh {
         line2 = lineSensor2.getVoltage();
         line3 = lineSensor3.getVoltage();
 
+        lineFront = lineSensorFront.getVoltage();
+
         onLine1 = line1 > lineThreshold;
         onLine2 = line2 > lineThreshold;
         onLine3 = line3 > lineThreshold;
 
-        leftSonarDist = leftSonar.getVoltage();
+        onLineFront = lineFront > lineThreshold;
+
+        //leftSonarDist = leftSonar.getVoltage();
         //rightSonarDist = rightSonar.getVoltage();
 
         vortexSeen = leftSonarDist > 0.08 || rightSonarDist > 0.08;
@@ -171,7 +183,7 @@ public class Sensors implements ParameterRefresh {
 
         t.addData("Colors", (isLeftColorValid ? leftColor : "None") + " " + (isRightColorValid ? rightColor : "None"));
         t.addData("Proximity", String.format("Mid: %.2f Far: %.2f", midProximity, farProximity));
-        t.addData("Sonar", String.format("Left: %.2f, Right: %.2f", leftSonarDist, rightSonarDist));
+        //t.addData("Sonar", String.format("Left: %.2f, Right: %.2f", leftSonarDist, rightSonarDist));
         t.addData("Line", String.format("1: %.2f, 2: %.2f, 3: %.2f", line1, line2, line3));
         t.addData("On Line", "1: " + onLine1 + ", 2:" + onLine2 + ", 3:" + onLine3);
         t.addData("Vortex Seen", vortexSeen);
@@ -187,7 +199,7 @@ public class Sensors implements ParameterRefresh {
 
     }
 
-    boolean onLine(double threshold) {
+    boolean onLineMid(double threshold) {
         if(line1 > threshold || line2 > threshold || line3 > threshold) {
             return true;
         }
